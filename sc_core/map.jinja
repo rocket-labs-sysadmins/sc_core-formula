@@ -1,6 +1,6 @@
-{% set pkgs_present = salt['pillar.get']('sc_core:pkgs_present', []) %}
+{% set pkgs.present = salt['pillar.get']('sc_core:pkgs_present', []) %}
 
-{% set pkgs_absent = salt['pillar.get']('sc_core:pkgs_absent', []) %}
+{% set pkgs.absent = salt['pillar.get']('sc_core:pkgs_absent', []) %}
 
 {% set patches = salt['grains.filter_by']({
     'Debian': {
