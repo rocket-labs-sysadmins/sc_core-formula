@@ -6,6 +6,7 @@ sc_core.packages_present:
       {% for package in pkgs_present %}
       {% if package not in pkgs_absent %}
       - {{ package }}
+      {%- endif %}
       {%- endfor %}
 
 sc_core.packages_absent:
