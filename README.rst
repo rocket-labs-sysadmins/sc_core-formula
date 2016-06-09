@@ -60,3 +60,8 @@ Installs and configures oom protection files.
 ---------------
 
 Installs custom cloud providers and profiles.
+
+``sc_core.limits``
+---------------
+
+Sets default system limits.
