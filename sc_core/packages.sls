@@ -1,4 +1,4 @@
-{% from "sc_core/map.jinja" import packages with context %}
+{% from "sc_core/map.jinja" import packages, pkgs_present, pkgs_absent with context %}
 
 sc_core.packages_present:
   pkg.installed:
