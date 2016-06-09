@@ -1,0 +1,6 @@
+
+OS:         {{ grains['os'] }} - {{ grains['osrelease'] }}
+Virtual:    {{ grains['virtual'] }}
+SaltStack:  {{ grains['saltversion'] }}
+Python:     {{ grains['pythonversion']|join(".") }}
+

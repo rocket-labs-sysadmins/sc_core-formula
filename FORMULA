@@ -1,0 +1,8 @@
+name: nginx
+os: RedHat, Debian
+os_family: RedHat, Debian
+version: 201507
+release: 1
+minimum_version: 2015.8
+summary: Formula for managing sc base
+description: Formula for managing packets and configuration

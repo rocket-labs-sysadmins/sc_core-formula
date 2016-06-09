@@ -1,0 +1,12 @@
+{% set pkgs_present = salt['pillar.get']('sc_core:pkgs_present', []) %}
+
+{% set pkgs_absent = salt['pillar.get']('sc_core:pkgs_absent', []) %}
+
+{% set patches = salt['grains.filter_by']({
+    'Debian': {
+        'cloud': '/usr/lib/python2.7/dist-packages/salt/states/cloud.py',
+    },
+    'RedHat': {
+        'cloud': '/usr/lib/python2.7/site-packages/salt/states/cloud.py',
+    },
+}, merge=salt['pillar.get']('sc_core:lookup')) %}

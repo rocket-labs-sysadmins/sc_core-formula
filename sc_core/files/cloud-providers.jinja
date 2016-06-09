@@ -1,0 +1,52 @@
+{% set venture = salt['pillar.get']('venture', {}) -%}
+{% set provider = salt['pillar.get']('cloud-providers', {}) -%}
+{% set profile = salt['pillar.get']('cloud-profiles', {}) %}
+{% set location = salt['pillar.get']('cloud-providers:location') -%}
+{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] %}
+{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] %}
+
+{% set availability_zones = [] %}
+{% set subnet_cidrs = [] %}
+{% for subnet in subnets %}
+{% do subnet_cidrs.append(subnet.cidr_block) %}
+{% do availability_zones.append(subnet.availability_zone) %}
+{% endfor %}
+
+{%- set azs = cycler(*availability_zones) %}
+
+{%- for salt_role, values in profile.ec2.iteritems() -%}
+  {%- for environment in values.environments %}
+    {%- for az in availability_zones %}
+
+venture-{{ salt_role }}-{{ environment }}-provider-{{ az }}-{{ venture }}:
+  minion:
+    {%- if 'syndic_instance' in salt_role %}
+    master: saltmaster.sellercenter.net
+    {%- else %}
+    master: {{ grains['fqdn_ip4'] }}
+    {%- endif %}
+  grains:
+    venture: {{ venture }}
+    roles:
+    {%- for role in values.roles %}
+      - {{ role }}
+    {%- endfor %}
+    environments: {{ environment }}
+  id: {{ provider.id }}
+  key: '{{ provider.key }}'
+  private_key: /etc/salt/{{ venture }}.pem
+  keyname: {{ venture }}
+  location: {{ provider.location }}
+  availability_zone: {{ az }}
+  {%- if 'syndic_instance' in salt_role %}
+  ssh_interface: public_ips
+  iam_profile: {{ provider.syndic_iam_profile }}
+  {%- else %}
+  ssh_interface: private_ips
+  iam_profile: {{ provider.syndic_iam_profile }}
+  {%- endif %}
+  provider: ec2
+
+      {%- endfor %}
+  {%- endfor %}
+{%- endfor %}

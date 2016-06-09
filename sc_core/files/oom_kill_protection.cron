@@ -1,0 +1,6 @@
+# File managed by Salt.
+# Source: salt/sc_core/files/oom_kill_protection.cron
+# Used in: salt/sc_core/oom_kill_protection.sls
+
+# m h  dom mon dow user command
+  */15 *   *   *   *  root flock --nonblock /var/lock/oom_kill_protection /usr/local/sbin/oom_kill_protection >>/var/log/oom_kill_protection 2>&1

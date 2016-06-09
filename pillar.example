@@ -1,0 +1,6 @@
+sc_core:
+  pkgs_present:
+    - htop
+    - vim
+  pkgs_absent:
+	  - mtr

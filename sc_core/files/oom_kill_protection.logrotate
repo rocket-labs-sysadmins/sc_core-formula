@@ -1,0 +1,13 @@
+# File managed by Salt.
+# Source: salt/sc_core/files/oom_kill_protection.logrotate
+# Used in: salt/sc_core/oom_kill_protection.sls
+
+/var/log/oom_kill_protection
+{
+	rotate 7
+	daily
+	missingok
+	notifempty
+	delaycompress
+	compress
+}

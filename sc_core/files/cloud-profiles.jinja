@@ -1,0 +1,168 @@
+{# Setup variables #}
+{% set venture = salt['pillar.get']('venture', {}) -%}
+{% set provider = salt['pillar.get']('cloud-providers', {}) -%}
+{% set profile = salt['pillar.get']('cloud-profiles', {}) %}
+{% set location = salt['pillar.get']('cloud-providers:location') -%}
+
+{% set syndic_instance = salt['pillar.get']('cloud-profiles:ec2:syndic_instance') %}
+{% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance') %}
+{% set web_instance = salt['pillar.get']('cloud-profiles:ec2:web_instance') %}
+
+
+{% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') %}
+{%- set syndic_operating_system = syndic_instance.operating_system | default( profile.operating_system ) %}
+{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] %}
+{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] %}
+{% set all_local = salt['boto_secgroup.convert_to_group_ids'](groups=['all-local'], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
+{% set syndic_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.syndic_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
+{% set web_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.web_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
+{% set icinga_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.icinga_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
+
+{%- set syn_subnets = [] %}
+{%- set loc_subnets = [] %}
+
+{# Start logic #}
+
+{%- if aws_infrastructure %}
+  {%- for s_subnet in subnets %}
+    {%- if 'Name' in s_subnet.tags %}
+      {%- if 'syndic' in s_subnet.tags.Name %}
+{%- do syn_subnets.append(s_subnet) %}
+      {%- elif 'local' in s_subnet.tags.Name %}
+{%- do loc_subnets.append(s_subnet) %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- else %}
+  {%- for s_subnet in subnets %}
+    {%- if 'Name' in s_subnet.tags %}
+      {%- if 'syndic' in s_subnet.tags.Name %}
+{%- do syn_subnets.append(s_subnet) %}
+      {%- elif 'local' in s_subnet.tags.Name %}
+{%- do loc_subnets.append(s_subnet) %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+
+{%- if aws_infrastructure %}
+syndic-{{ venture }}:
+  provider: venture-syndic_instance-live-provider-{{ syn_subnets[syndic_instance.az_number|default(1)].availability_zone }}-{{ venture }}
+  image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, syndic_operating_system), 'cloud-images:%s:debian' % location) }}
+  size: {{ syndic_instance.environments.live.size }}
+  {% if 'centos' in syndic_operating_system %}
+  ssh_username: centos
+  {% else %}
+  ssh_username: admin
+  {% endif %}
+  script: bootstrap-salt
+  #script_args: -M -L -P git v2015.8.7
+  tag: {'Venture': '{{ venture }}' }
+  block_device_mappings:
+  {%- if 'centos' in syndic_operating_system %}
+    - DeviceName: /dev/sda1
+  {%- else %}
+    - DeviceName: /dev/xvda
+  {%- endif %}
+      Ebs.VolumeSize: {{ syndic_instance.environments.live.root_storage }}
+      Ebs.VolumeType: gp2
+  network_interfaces:
+    - DeviceIndex: 0
+      SubnetId: {{ syn_subnets[syndic_instance.az_number|default(1)].id }}
+      allocate_new_eips: True
+      SecurityGroupId:
+        - {{ all_local[0] }}
+        - {{ syndic_sg_id[0] }}
+{%- else %}
+syndic-{{ venture }}:
+  provider: venture-syndic_instance-live-provider-{{ syn_subnets[0].availability_zone }}-{{ venture }}
+  image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, syndic_operating_system), 'cloud-images:%s:debian' % location) }}
+  size: {{ syndic_instance.environments.live.size }}
+  {% if 'centos' in syndic_operating_system %}
+  ssh_username: centos
+  {% else %}
+  ssh_username: admin
+  {% endif %}
+  script: bootstrap-salt
+  #script_args: git v2015.8.3
+  tag: {'Venture': '{{ venture }}' }
+  subnetid: {{ syn_subnets[0].id }}
+  network_interfaces:
+      allocate_new_eips: True
+  securitygroupid:
+    - {{ syndic_sg_id[0] }}
+  block_device_mappings:
+  {%- if 'centos' in syndic_operating_system %}
+    - DeviceName: /dev/sda1
+  {%- else %}
+    - DeviceName: /dev/xvda
+  {%- endif %}
+      Ebs.VolumeSize: {{ syndic_instance.environments.live.root_storage }}
+      Ebs.VolumeType: gp2
+{%- endif %}
+
+{%- if aws_infrastructure %}
+  {%- set icinga_operating_system = icinga_instance.operating_system | default( profile.operating_system ) %}
+icinga-{{ venture }}:
+  provider: venture-icinga_instance-production-provider-{{ loc_subnets[0].availability_zone }}-{{ venture }}
+  image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, icinga_operating_system), 'cloud-images:%s:debian' % location) }}
+  size: {{ icinga_instance.environments.production.size }}
+  {%- if 'centos' in icinga_operating_system %}
+  ssh_username: centos
+  {%- else %}
+  ssh_username: admin
+  {%- endif %}
+  script: bootstrap-salt
+  #script_args: -U -P git v2015.8.3
+  tag: {'Venture': '{{ venture }}' }
+  subnetid: {{ loc_subnets[0].id }}
+  securitygroupid:
+    - {{ icinga_sg_id[0] }}
+    - {{ all_local[0] }}
+  {%- if icinga_instance.environments.production.storage is defined %}
+  volumes:
+    - { size: {{ icinga_instance.environments.production.storage }}, device: /dev/xvdb, type: standard }
+  {%- endif %}
+  block_device_mappings:
+  {%- if 'centos' in icinga_operating_system %}
+    - DeviceName: /dev/sda1
+  {%- else %}
+    - DeviceName: /dev/xvda
+  {%- endif %}
+      Ebs.VolumeSize: {{ icinga_instance.environments.production.root_storage }}
+      Ebs.VolumeType: gp2
+
+  {%- set web_operating_system = web_instance.operating_system | default( profile.operating_system ) %}
+  {%- for environment, options in web_instance.environments.iteritems() %}
+    {%- set loc_azs = cycler(*web_instance.az_numbers|default(range(1, loc_subnets|length))) %}
+    {%- for count in range(web_instance.instances) %}
+      {%- set index = loc_azs.next() %}
+web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
+  provider: venture-web_instance-{{ environment }}-provider-{{ loc_subnets[index].availability_zone }}-{{ venture }}
+  image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, web_operating_system), 'cloud-images:%s:debian' % location) }}
+  size: {{ options.size }}
+    {%- if 'centos' in web_operating_system %}
+  ssh_username: centos
+    {%- else %}
+  ssh_username: admin
+    {%- endif %}
+  script: bootstrap-salt
+  #script_args: -U -P git v2015.8.1
+  tag: {'Venture': '{{ venture }}' }
+  subnetid: {{ loc_subnets[index].id }}
+  securitygroupid:
+    - {{ web_sg_id[0] }}
+    - {{ all_local[0] }}
+  volumes:
+    - { size: {{ options.storage }}, device: /dev/xvdb, type: gp2 }
+  block_device_mappings:
+      {%- if 'centos' in web_operating_system %}
+    - DeviceName: /dev/sda1
+      {%- else %}
+    - DeviceName: /dev/xvda
+      {%- endif %}
+      Ebs.VolumeSize: {{ options.root_storage }}
+      Ebs.VolumeType: gp2
+    {%- endfor %}
+  {%- endfor %}
+{%- endif %}

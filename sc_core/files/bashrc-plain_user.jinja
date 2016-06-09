@@ -1,0 +1,35 @@
+###
+### This file is maintained by saltstack. If you want to modify it,
+### please modify the source file in saltstack-master files repository.
+### Otherwise it will be overwritten by saltstack!
+###
+
+# Exporting the PS1 env. for user
+PS1='${debian_chroot:+($debian_chroot)}\[\e[0;32m\]\u\[\e[m\]\[\e[1;33m\]@\[\e[m\]\[\e[0;36m\]{{ grains['id'] }}\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[0;32m\]\$\[\e[m\] \[\e[0m\]'
+
+# Some aliases
+export LS_OPTIONS='--color=auto'
+eval "`dircolors`"
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -l'
+alias la='ls $LS_OPTIONS -lA'
+alias wim='vim "+set number"'
+alias dir="/bin/ls -ahl"
+alias ..="cd ../"
+alias ...="cd ../../"
+alias grep='grep --color=auto'
+
+# History
+HISTCONTROL=ignoredups:ignorespace
+HISTSIZE=100000
+export HISTSIZE
+
+# Check the window size after each command and, if necessary,
+# Update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+if [ -f /etc/redhat-release ]; then
+  [ -f /etc/bashrc ] && . /etc/bashrc
+fi
+
+export EDITOR=vim

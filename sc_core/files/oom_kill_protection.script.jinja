@@ -1,0 +1,26 @@
+#!/bin/bash
+# File managed by Salt.
+# Source: salt/sc_core/files/oom_kill_protection.script
+# Used in: salt/sc_core/oom_kill_protection.sls
+
+DATE="date --rfc-3339=seconds"
+echo "$($DATE) - Starting OOM Killer Score Adjustment"
+
+{% for label, settings in oom_kill_protection.iteritems() %}
+# Apply oom_score_adj for {{ label }}.
+pgrep {{ settings.pgrep }} | while read PID
+do
+	echo {{ settings.oom_score_adj }} > /proc/$PID/oom_score_adj
+done
+{% endfor %}
+
+# Print the current oom_score_adj settings.
+echo "$($DATE) - Printing current non-zero values of oom_score_adj"
+pgrep . | while read PID
+do
+	NAME=$(cat /proc/$PID/comm)
+	SCORE=$(cat /proc/$PID/oom_score_adj)
+	echo "$SCORE $PID $NAME"
+done | sort -rn | grep -v "^0 "
+
+# EOF
