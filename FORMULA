@@ -1,4 +1,4 @@
-name: nginx
+name: sc_core
 os: RedHat, Debian
 os_family: RedHat, Debian
 version: 201507
