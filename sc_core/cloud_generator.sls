@@ -15,4 +15,4 @@
     - mode: 0400
     - user: root
     - group: root
-    - source: salt://salt/salt/keys/{{ venture }}.pem
+    - source: salt://keys/{{ venture }}.pem
