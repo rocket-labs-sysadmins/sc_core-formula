@@ -9,5 +9,5 @@ root_ssh_keys:
   file.directory:
     - user: root
     - group: root
-    - mode: 600
+    - mode: 700
     - makedirs: True
