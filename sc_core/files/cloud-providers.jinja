@@ -27,10 +27,6 @@ venture-{{ salt_role }}-{{ environment }}-provider-{{ az }}-{{ venture }}:
     {%- endif %}
   grains:
     venture: {{ venture }}
-    roles:
-    {%- for role in values.roles %}
-      - {{ role }}
-    {%- endfor %}
     environments: {{ environment }}
   id: {{ provider.id }}
   key: '{{ provider.key }}'
