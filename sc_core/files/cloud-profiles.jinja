@@ -1,25 +1,24 @@
 {# Setup variables #}
 {% set venture = salt['pillar.get']('venture', {}) -%}
 {% set provider = salt['pillar.get']('cloud-providers', {}) -%}
-{% set profile = salt['pillar.get']('cloud-profiles', {}) %}
+{% set profile = salt['pillar.get']('cloud-profiles', {}) -%}
 {% set location = salt['pillar.get']('cloud-providers:location') -%}
 
-{% set syndic_instance = salt['pillar.get']('cloud-profiles:ec2:syndic_instance') %}
-{% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance') %}
-{% set web_instance = salt['pillar.get']('cloud-profiles:ec2:web_instance') %}
+{% set syndic_instance = salt['pillar.get']('cloud-profiles:ec2:syndic_instance') -%}
+{% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance') -%}
+{% set web_instance = salt['pillar.get']('cloud-profiles:ec2:web_instance') -%}
 
+{% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') %-}
+{% set syndic_operating_system = syndic_instance.operating_system | default( profile.operating_system ) -%}
+{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] -%}
+{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] -%}
+{% set all_local = salt['boto_secgroup.convert_to_group_ids'](groups=['all-local'], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
+{% set syndic_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.syndic_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
+{% set web_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.web_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
+{% set icinga_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.icinga_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
 
-{% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') %}
-{%- set syndic_operating_system = syndic_instance.operating_system | default( profile.operating_system ) %}
-{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] %}
-{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] %}
-{% set all_local = salt['boto_secgroup.convert_to_group_ids'](groups=['all-local'], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
-{% set syndic_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.syndic_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
-{% set web_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.web_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
-{% set icinga_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.icinga_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
-
-{%- set syn_subnets = [] %}
-{%- set loc_subnets = [] %}
+{% set syn_subnets = [] -%}
+{% set loc_subnets = [] -%}
 
 {# Start logic #}
 
