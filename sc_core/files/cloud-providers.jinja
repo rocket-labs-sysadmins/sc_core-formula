@@ -2,15 +2,15 @@
 {% set provider = salt['pillar.get']('cloud-providers', {}) -%}
 {% set profile = salt['pillar.get']('cloud-profiles', {}) %}
 {% set location = salt['pillar.get']('cloud-providers:location') -%}
-{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] %}
-{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] %}
+{% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] -%}
+{% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] -%}
 
-{% set availability_zones = [] %}
-{% set subnet_cidrs = [] %}
-{% for subnet in subnets %}
-{% do subnet_cidrs.append(subnet.cidr_block) %}
-{% do availability_zones.append(subnet.availability_zone) %}
-{% endfor %}
+{% set availability_zones = [] -%}
+{% set subnet_cidrs = [] -%}
+{% for subnet in subnets -%}
+{% do subnet_cidrs.append(subnet.cidr_block) -%}
+{% do availability_zones.append(subnet.availability_zone) -%}
+{%- endfor %}
 
 {%- set azs = cycler(*availability_zones) %}
 
