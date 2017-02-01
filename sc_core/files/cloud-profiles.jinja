@@ -151,11 +151,7 @@ web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
   volumes:
     - { size: {{ options.storage }}, device: /dev/xvdb, type: gp2 }
   block_device_mappings:
-      {%- if 'centos' in web_operating_system %}
-    - DeviceName: /dev/sda1
-      {%- else %}
     - DeviceName: /dev/xvda
-      {%- endif %}
       Ebs.VolumeSize: {{ options.root_storage }}
       Ebs.VolumeType: gp2
     {%- endfor %}
