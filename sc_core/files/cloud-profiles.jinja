@@ -123,11 +123,7 @@ icinga-{{ venture }}:
     - { size: {{ icinga_instance.environments.production.storage }}, device: /dev/xvdb, type: standard }
   {%- endif %}
   block_device_mappings:
-  {%- if 'centos' in icinga_operating_system %}
-    - DeviceName: /dev/sda1
-  {%- else %}
     - DeviceName: /dev/xvda
-  {%- endif %}
       Ebs.VolumeSize: {{ icinga_instance.environments.production.root_storage }}
       Ebs.VolumeType: gp2
 
