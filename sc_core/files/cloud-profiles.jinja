@@ -8,7 +8,7 @@
 {% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance') -%}
 {% set web_instance = salt['pillar.get']('cloud-profiles:ec2:web_instance') -%}
 
-{% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') %-}
+{% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') -%}
 {% set syndic_operating_system = syndic_instance.operating_system | default( profile.operating_system ) -%}
 {% set vpc_id = salt['boto_vpc.get_id'](name=venture, region=provider.location, keyid=provider.id, key=provider.key)['id'] -%}
 {% set subnets = salt['boto_vpc.describe_subnets'](vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key)['subnets'] -%}
