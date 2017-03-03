@@ -102,16 +102,16 @@ syndic-{{ venture }}:
 
 {%- if aws_infrastructure %}
   {%- if icinga_instance %}
-  {%- set icinga_operating_system = icinga_instance.operating_system | default( profile.operating_system ) %}
+    {%- set icinga_operating_system = icinga_instance.operating_system | default( profile.operating_system ) %}
 icinga-{{ venture }}:
   provider: venture-icinga_instance-production-provider-{{ loc_subnets[0].availability_zone }}-{{ venture }}
   image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, icinga_operating_system), 'cloud-images:%s:debian' % location) }}
   size: {{ icinga_instance.environments.production.size }}
-  {%- if 'centos' in icinga_operating_system %}
+    {%- if 'centos' in icinga_operating_system %}
   ssh_username: centos
-  {%- else %}
+    {%- else %}
   ssh_username: admin
-  {%- endif %}
+    {%- endif %}
   script: bootstrap-salt
   #script_args: -U -P git v2015.8.3
   tag: {'Venture': '{{ venture }}' }
@@ -119,25 +119,25 @@ icinga-{{ venture }}:
   securitygroupid:
     - {{ icinga_sg_id[0] }}
     - {{ all_local[0] }}
-  {%- if icinga_instance.environments.production.storage is defined %}
+    {%- if icinga_instance.environments.production.storage is defined %}
   volumes:
     - { size: {{ icinga_instance.environments.production.storage }}, device: /dev/xvdb, type: standard }
-  {%- endif %}
+    {%- endif %}
   block_device_mappings:
-  {%- if 'centos' in icinga_operating_system %}
+    {%- if 'centos' in icinga_operating_system %}
     - DeviceName: /dev/sda1
-  {%- else %}
+    {%- else %}
     - DeviceName: /dev/xvda
-  {%- endif %}
+    {%- endif %}
       Ebs.VolumeSize: {{ icinga_instance.environments.production.root_storage }}
       Ebs.VolumeType: gp2
+  {%- endif %}
 
   {%- set web_operating_system = web_instance.operating_system | default( profile.operating_system ) %}
   {%- for environment, options in web_instance.environments.iteritems() %}
     {%- set loc_azs = cycler(*web_instance.az_numbers|default(range(1, loc_subnets|length))) %}
     {%- for count in range(web_instance.instances) %}
       {%- set index = loc_azs.next() %}
-  {%- endif %}
 web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
   provider: venture-web_instance-{{ environment }}-provider-{{ loc_subnets[index].availability_zone }}-{{ venture }}
   image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, web_operating_system), 'cloud-images:%s:debian' % location) }}
