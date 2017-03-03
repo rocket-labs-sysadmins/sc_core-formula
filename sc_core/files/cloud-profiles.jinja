@@ -5,7 +5,7 @@
 {% set location = salt['pillar.get']('cloud-providers:location') -%}
 
 {% set syndic_instance = salt['pillar.get']('cloud-profiles:ec2:syndic_instance') -%}
-{% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance') -%}
+{% set icinga_instance = salt['pillar.get']('cloud-profiles:ec2:icinga_instance', {}) -%}
 {% set web_instance = salt['pillar.get']('cloud-profiles:ec2:web_instance') -%}
 
 {% set aws_infrastructure = salt['pillar.get']('cloud-profiles:aws_infrastructure') -%}
@@ -101,6 +101,7 @@ syndic-{{ venture }}:
 {%- endif %}
 
 {%- if aws_infrastructure %}
+  {%- if icinga_instance %}
   {%- set icinga_operating_system = icinga_instance.operating_system | default( profile.operating_system ) %}
 icinga-{{ venture }}:
   provider: venture-icinga_instance-production-provider-{{ loc_subnets[0].availability_zone }}-{{ venture }}
@@ -136,6 +137,7 @@ icinga-{{ venture }}:
     {%- set loc_azs = cycler(*web_instance.az_numbers|default(range(1, loc_subnets|length))) %}
     {%- for count in range(web_instance.instances) %}
       {%- set index = loc_azs.next() %}
+  {%- endif %}
 web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
   provider: venture-web_instance-{{ environment }}-provider-{{ loc_subnets[index].availability_zone }}-{{ venture }}
   image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, web_operating_system), 'cloud-images:%s:debian' % location) }}
