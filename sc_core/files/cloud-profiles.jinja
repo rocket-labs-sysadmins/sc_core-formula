@@ -15,7 +15,6 @@
 {% set all_local = salt['boto_secgroup.convert_to_group_ids'](groups=['all-local'], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
 {% set syndic_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.syndic_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
 {% set web_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.web_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
-{% set icinga_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.icinga_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) -%}
 
 {% set syn_subnets = [] -%}
 {% set loc_subnets = [] -%}
@@ -103,6 +102,7 @@ syndic-{{ venture }}:
 {%- if aws_infrastructure %}
   {%- if icinga_instance %}
     {%- set icinga_operating_system = icinga_instance.operating_system | default( profile.operating_system ) %}
+    {%- set icinga_sg_id = salt['boto_secgroup.convert_to_group_ids'](groups=[profile.ec2.icinga_instance.security_group.name], vpc_id=vpc_id, region=provider.location, keyid=provider.id, key=provider.key) %}
 icinga-{{ venture }}:
   provider: venture-icinga_instance-production-provider-{{ loc_subnets[0].availability_zone }}-{{ venture }}
   image: {{ salt['pillar.get']('cloud-images:%s:%s' % (location, icinga_operating_system), 'cloud-images:%s:debian' % location) }}
