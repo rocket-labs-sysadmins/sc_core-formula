@@ -55,6 +55,7 @@ syndic-{{ venture }}:
   {% endif %}
   script: bootstrap-salt
   #script_args: -M -L -P git v2015.8.7
+  script_args: stable 2016.11.1
   tag: {'Venture': '{{ venture }}' }
   block_device_mappings:
   {%- if 'centos' in syndic_operating_system %}
@@ -83,6 +84,7 @@ syndic-{{ venture }}:
   {% endif %}
   script: bootstrap-salt
   #script_args: git v2015.8.3
+  script_args: stable 2016.11.1
   tag: {'Venture': '{{ venture }}' }
   subnetid: {{ syn_subnets[0].id }}
   network_interfaces:
@@ -114,6 +116,7 @@ icinga-{{ venture }}:
     {%- endif %}
   script: bootstrap-salt
   #script_args: -U -P git v2015.8.3
+  script_args: stable 2016.11.1
   tag: {'Venture': '{{ venture }}' }
   subnetid: {{ loc_subnets[0].id }}
   securitygroupid:
@@ -149,6 +152,7 @@ web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
     {%- endif %}
   script: bootstrap-salt
   #script_args: -U -P git v2015.8.1
+  script_args: stable 2016.11.1
   tag: {'Venture': '{{ venture }}' }
   subnetid: {{ loc_subnets[index].id }}
   securitygroupid:
