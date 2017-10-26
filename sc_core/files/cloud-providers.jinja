@@ -42,6 +42,7 @@ venture-{{ salt_role }}-{{ environment }}-provider-{{ az }}-{{ venture }}:
   iam_profile: {{ provider.syndic_iam_profile }}
   {%- endif %}
   provider: ec2
+	driver: ec2
 
       {%- endfor %}
   {%- endfor %}
