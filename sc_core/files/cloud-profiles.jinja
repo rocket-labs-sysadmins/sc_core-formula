@@ -158,7 +158,7 @@ web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
   securitygroupid:
     - {{ web_sg_id[0] }}
     - {{ all_local[0] }}
-    {%- if web_instance.environments.{{ environment }}.storage is defined %}
+    {%- if options.storage is defined %}
   volumes:
     - { size: {{ options.storage }}, device: /dev/xvdb, type: gp2 }
     {%- endif %}
