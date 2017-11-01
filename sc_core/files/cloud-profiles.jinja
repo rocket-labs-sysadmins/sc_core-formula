@@ -153,7 +153,7 @@ web0{{ count + 1 }}-{{ environment }}-{{ venture }}:
   script: bootstrap-salt
   #script_args: -U -P git v2015.8.1
   script_args: stable 2017.7
-  tag: {'Venture': '{{ venture }}' }
+  tag: {'Venture': '{{ venture }}', 'Environment': '{{ environment }}' }
   subnetid: {{ loc_subnets[index].id }}
   securitygroupid:
     - {{ web_sg_id[0] }}

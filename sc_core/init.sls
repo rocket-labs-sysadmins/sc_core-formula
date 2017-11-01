@@ -4,7 +4,6 @@ include:
   - sc_core.logrotate
   - sc_core.motd
   - sc_core.root_ssh
-  - sc_core.salt_patches
   - sc_core.limits
   - sc_core.oom_kill_protection
 
